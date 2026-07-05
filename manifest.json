@@ -1,1 +1,9 @@
-ECHO is on.
+{
+  "manifest_version": 3,
+  "name": "Page Vault",
+  "version": "0.1.0",
+  "description": "Archive webpages into lightweight HTML files.",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
