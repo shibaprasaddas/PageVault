@@ -5,7 +5,8 @@
   "description": "Archive webpages into lightweight HTML files.",
 
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "tabs"
   ],
 
   "action": {
