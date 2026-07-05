@@ -1,1 +1,6 @@
-ECHO is on.
+document.getElementById("saveButton").addEventListener("click", () => {
+
+    document.getElementById("output").textContent =
+        "Button clicked!";
+
+});

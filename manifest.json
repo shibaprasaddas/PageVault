@@ -3,7 +3,19 @@
   "name": "Page Vault",
   "version": "0.1.0",
   "description": "Archive webpages into lightweight HTML files.",
+
+  "permissions": [
+    "activeTab"
+  ],
+
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
 }

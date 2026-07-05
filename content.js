@@ -1,1 +1,1 @@
-ECHO is on.
+console.log("Page Vault: content script loaded.");
