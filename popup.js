@@ -1,3 +1,101 @@
+const USER_NAME = "Shiba";
+const COMPANY_PLACEHOLDER = "Company";
+const SOURCE_PLACEHOLDER = "Source";
+
+function sanitizeFileName(text) {
+
+    return text
+
+        // Remove common gender notation
+        .replace(/\(m\/f\/d\)/gi, "")
+        .replace(/\(m\/w\/d\)/gi, "")
+        .replace(/\(mwd\)/gi, "")
+
+        // Remove any remaining brackets
+        .replace(/[()]/g, "")
+
+        // Remove illegal filename characters
+        .replace(/[\\/:*?"<>|]/g, "")
+
+        // Replace dots with underscores
+        .replace(/\./g, "_")
+
+        // Replace whitespace with underscore
+        .replace(/\s+/g, "_")
+
+        // Collapse multiple underscores
+        .replace(/_+/g, "_")
+
+        // Remove leading/trailing underscores
+        .replace(/^_+|_+$/g, "");
+
+}
+
+function formatDate(date = new Date()) {
+
+    const months = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    return `${date.getDate()}-${months[date.getMonth()]}-${date.getFullYear()}`;
+
+}
+
+function detectSource(url) {
+
+    const host = new URL(url).hostname.toLowerCase();
+
+    let source = host;
+
+    // Remove common prefixes
+    source = source.replace(/^www\./, "");
+    source = source.replace(/^careers\./, "");
+    source = source.replace(/^career\./, "");
+    source = source.replace(/^jobs\./, "");
+    source = source.replace(/^job\./, "");
+    source = source.replace(/^emp\./, "");
+
+    // Keep only the first part of the hostname
+    source = source.split(".")[0];
+
+    // Replace hyphens and underscores with spaces
+    source = source.replace(/[-_]/g, " ");
+
+    // Convert each word to Title Case
+    source = source
+        .split(" ")
+        .map(word =>
+            word.charAt(0).toUpperCase() +
+            word.slice(1).toLowerCase()
+        )
+        .join("");
+
+    return source;
+
+}
+
+function createBaseFileName(pageData) {
+
+    const jobTitle = sanitizeFileName(pageData.title);
+
+    const company =
+    pageData.company
+        ? sanitizeFileName(pageData.company)
+        : COMPANY_PLACEHOLDER;
+
+    const source = detectSource(pageData.url);
+
+    return [
+        USER_NAME,
+        jobTitle,
+        company,
+        source,
+        formatDate()
+    ].join("_");
+
+}
+
 function createHtml(pageData) {
 
     return `<!DOCTYPE html>
@@ -160,8 +258,7 @@ const json = createJson(response);
 
 const zip = new JSZip();
 
-const baseName =
-    response.title.replace(/[\\/:*?"<>|]/g, "_");
+const baseName = createBaseFileName(response);
 
 zip.file(baseName + ".html", html);
 
