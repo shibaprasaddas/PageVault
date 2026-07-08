@@ -86,6 +86,33 @@ ${pageData.content || pageData.text}
 
 }
 
+function createJson(pageData) {
+
+    const jobData = {
+
+        version: "1.0",
+
+        extensionVersion: "0.1.0",
+
+        savedOn: new Date().toISOString(),
+
+        source: new URL(pageData.url).hostname,
+
+        title: pageData.title,
+
+        url: pageData.url,
+
+        text: pageData.text,
+
+        content: pageData.content
+
+    };
+
+    return JSON.stringify(jobData, null, 2);
+
+}
+
+
 document.getElementById("saveButton").addEventListener("click", async () => {
 
     const output = document.getElementById("output");
@@ -129,12 +156,63 @@ ${response.text.substring(0,300)}
 `;
 // NEW CODE
 const html = createHtml(response);
+const json = createJson(response);
+
+const zip = new JSZip();
+
+const baseName =
+    response.title.replace(/[\\/:*?"<>|]/g, "_");
+
+zip.file(baseName + ".html", html);
+
+zip.file(baseName + ".json", json);
+
+console.log(zip);
+
+zip.generateAsync({
+    type: "blob"
+}).then((zipBlob) => {
+
+    const zipUrl = URL.createObjectURL(zipBlob);
+
+    chrome.downloads.download({
+
+        url: zipUrl,
+
+        filename: baseName + ".zip",
+
+        saveAs: true
+
+    }, (downloadId) => {
+
+        if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError);
+            return;
+        }
+
+        console.log("ZIP Download started:", downloadId);
+
+        URL.revokeObjectURL(zipUrl);
+
+    });
+
+});
+
+const jsonBlob = new Blob([json], {
+    type: "application/json"
+});
+
+const jsonBlobUrl = URL.createObjectURL(jsonBlob);
+
+console.log(json);
 console.log(html);
+console.log(typeof JSZip);
 
 const blob = new Blob([html], { type: "text/html" });
 
 const blobUrl = URL.createObjectURL(blob);
 
+/*
 chrome.downloads.download({
 
     url: blobUrl,
@@ -157,6 +235,29 @@ chrome.downloads.download({
     URL.revokeObjectURL(blobUrl);
 
 });
+
+chrome.downloads.download({
+
+    url: jsonBlobUrl,
+
+    filename:
+        response.title.replace(/[\\/:*?"<>|]/g, "_") + ".json",
+
+    saveAs: true
+
+}, (downloadId) => {
+
+    if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        return;
+    }
+
+    console.log("JSON Download started:", downloadId);
+
+    URL.revokeObjectURL(jsonBlobUrl);
+
+});
+*/
 
         }
     );
