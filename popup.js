@@ -1,6 +1,9 @@
 const USER_NAME = "Shiba";
 const COMPANY_PLACEHOLDER = "Company";
 const SOURCE_PLACEHOLDER = "Source";
+const MAX_TITLE_LENGTH = 45;
+const MAX_COMPANY_LENGTH = 20;
+const MAX_SOURCE_LENGTH = 20;
 
 function sanitizeFileName(text) {
 
@@ -28,6 +31,25 @@ function sanitizeFileName(text) {
 
         // Remove leading/trailing underscores
         .replace(/^_+|_+$/g, "");
+
+}
+
+function truncateFileNamePart(text, maxLength) {
+
+    if (!text)
+        return "";
+
+    if (text.length <= maxLength)
+        return text;
+
+    // Find the last underscore before the limit
+    const pos = text.lastIndexOf("_", maxLength);
+
+    if (pos > 0)
+        return text.substring(0, pos);
+
+    // No underscore found - hard truncate
+    return text.substring(0, maxLength);
 
 }
 
@@ -77,14 +99,22 @@ function detectSource(url) {
 
 function createBaseFileName(pageData) {
 
-    const jobTitle = sanitizeFileName(pageData.title);
+    const jobTitle = truncateFileNamePart(
+        sanitizeFileName(pageData.title),
+        MAX_TITLE_LENGTH
+    );
 
-    const company =
-    pageData.company
-        ? sanitizeFileName(pageData.company)
-        : COMPANY_PLACEHOLDER;
+    const company = truncateFileNamePart(
+        pageData.company
+            ? sanitizeFileName(pageData.company)
+            : COMPANY_PLACEHOLDER,
+        MAX_COMPANY_LENGTH
+    );
 
-    const source = detectSource(pageData.url);
+    const source = truncateFileNamePart(
+        detectSource(pageData.url),
+        MAX_SOURCE_LENGTH
+    );
 
     return [
         USER_NAME,
