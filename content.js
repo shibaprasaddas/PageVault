@@ -1,3 +1,31 @@
+function cleanTitle(title) {
+
+    if (!title)
+        return "";
+
+    return title
+        .split(/\s+[|–—]\s+/)[0]
+        .trim();
+
+}
+
+function cleanCompanyName(name) {
+
+    if (!name)
+        return "";
+
+    return name
+        .replace(/\bJob Portal\b/gi, "")
+        .replace(/\bCareer Portal\b/gi, "")
+        .replace(/\bCareers\b/gi, "")
+        .replace(/\bJobs\b/gi, "")
+        .replace(/\bRecruitment\b/gi, "")
+        .replace(/\bHiring\b/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
+
 function detectCompany() {
 
         // Try Open Graph site name
@@ -6,7 +34,7 @@ function detectCompany() {
     );
 
     if (ogSiteName && ogSiteName.content)
-        return ogSiteName.content.trim();
+        return cleanCompanyName(ogSiteName.content);
 
     // Try application name
     const appName = document.querySelector(
@@ -14,7 +42,7 @@ function detectCompany() {
     );
 
     if (appName && appName.content)
-        return appName.content.trim();
+        return cleanCompanyName(appName.content);
     
     const scripts = document.querySelectorAll(
         'script[type="application/ld+json"]'
@@ -36,7 +64,7 @@ function detectCompany() {
                     item.hiringOrganization &&
                     item.hiringOrganization.name) {
 
-                    return item.hiringOrganization.name.trim();
+                    return cleanCompanyName(item.hiringOrganization.name);
 
                 }
 
@@ -62,7 +90,9 @@ function detectCompany() {
 
             const parts = title.split(separator);
 
-            const company = parts[parts.length - 1].trim();
+            const company = cleanCompanyName(
+                parts[parts.length - 1]
+            );
 
             if (company.length > 1)
                 return company;
@@ -90,7 +120,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const article = reader.parse();
 
         sendResponse({
-            title: article ? article.title : document.title,
+            title: cleanTitle(
+                article ? article.title : document.title
+            ),
             url: window.location.href,
             text: article ? article.textContent : document.body.innerText,
             content: article ? article.content : "",

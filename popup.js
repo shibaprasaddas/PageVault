@@ -1,3 +1,5 @@
+const VERSION = "1.1";
+const EXTENSION_VERSION = "0.4.0";
 const USER_NAME = "Shiba";
 const COMPANY_PLACEHOLDER = "Company";
 const SOURCE_PLACEHOLDER = "Source";
@@ -218,18 +220,22 @@ function createJson(pageData) {
 
     const jobData = {
 
-        version: "1.0",
-
-        extensionVersion: "0.1.0",
+        // Metadata
+        version: VERSION,
+        extensionVersion: EXTENSION_VERSION,
 
         savedOn: new Date().toISOString(),
 
-        source: new URL(pageData.url).hostname,
-
+        // Job Details
         title: pageData.title,
+
+        company: pageData.company || "",
+
+        source: detectSource(pageData.url),
 
         url: pageData.url,
 
+        // Job Content
         text: pageData.text,
 
         content: pageData.content
