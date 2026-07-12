@@ -3,16 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <title>Page Vault</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            width: 350px;
+            margin: 10px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        td {
+            padding: 4px 2px;
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-weight: bold;
+            width: 80px;
+        }
+
+        #output {
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+
+    </style>
+
 </head>
+
 <body>
 
     <h2>Page Vault</h2>
+
+    <table>
+
+        <tr>
+            <td>Company</td>
+            <td id="company"></td>
+        </tr>
+
+        <tr>
+            <td>Title</td>
+            <td id="title"></td>
+        </tr>
+
+        <tr>
+            <td>Source</td>
+            <td id="source"></td>
+        </tr>
+
+        <tr>
+            <td>Location</td>
+            <td id="location"></td>
+        </tr>
+
+        <tr>
+            <td>German</td>
+            <td id="german"></td>
+        </tr>
+
+    </table>
 
     <button id="saveButton">Save Page</button>
 
     <hr>
 
-    <pre id="output">Ready...</pre>
+    <pre id="output"></pre>
 
     <script src="libs/jszip.min.js"></script>
     <script src="popup.js"></script>

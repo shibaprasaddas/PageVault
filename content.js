@@ -233,6 +233,24 @@ function detectCompany() {
 
 }
 
+function detectGermanRequirement(cleanText) {
+
+    if (!cleanText)
+        return "";
+
+    for (const rule of EXTRACTION_RULES.german) {
+
+        const match = cleanText.match(rule);
+
+        if (match)
+            return match[0];
+
+    }
+
+    return "";
+
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     console.log(typeof Readability);
@@ -247,6 +265,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const reader = new Readability(documentClone);
         const article = reader.parse();
 
+        const cleanText = createCleanText(
+            article ? article.content : ""
+        );
+
         sendResponse({
             title: cleanTitle(
                 article ? article.title : document.title
@@ -257,14 +279,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             text: article ? article.textContent : document.body.innerText,
 
             // AI-friendly text generated from HTML
-            cleanText: createCleanText(
-                article ? article.content : ""
-            ),
+            cleanText: cleanText,
 
             // Original extracted HTML
             content: article ? article.content : "",
 
-            company: detectCompany()
+            company: detectCompany(),
+            german: detectGermanRequirement(cleanText)
         });
 
     }

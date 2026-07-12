@@ -1,5 +1,5 @@
 const VERSION = "1.1";
-const EXTENSION_VERSION = "0.4.0";
+const EXTENSION_VERSION = "0.7.0";
 const USER_NAME = "Shiba";
 const COMPANY_PLACEHOLDER = "Company";
 const SOURCE_PLACEHOLDER = "Source";
@@ -242,6 +242,42 @@ function createJson(pageData) {
 
 }
 
+async function loadPageSummary() {
+
+    const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    });
+
+    chrome.tabs.sendMessage(
+        tab.id,
+        { action: "getPageData" },
+        (response) => {
+
+            if (chrome.runtime.lastError || !response)
+                return;
+
+            document.getElementById("company").textContent =
+                response.company || "";
+
+            document.getElementById("title").textContent =
+                response.title || "";
+
+            document.getElementById("source").textContent =
+                detectSource(response.url);
+
+            // Will be implemented later
+            document.getElementById("location").textContent = "";
+
+            document.getElementById("german").textContent =
+                response.german
+                    ? response.german
+                    : "";
+
+        }
+    );
+
+}
 
 document.getElementById("saveButton").addEventListener("click", async () => {
 
@@ -267,23 +303,7 @@ document.getElementById("saveButton").addEventListener("click", async () => {
                 return;
             }
 
-            output.textContent =
-`Title
 
-${response.title}
-
-URL
-
-${response.url}
-
-Characters
-
-${response.text.length}
-
-Preview
-
-${response.text.substring(0,300)}
-`;
 // NEW CODE
 const html = createHtml(response);
 const json = createJson(response);
@@ -320,7 +340,7 @@ zip.generateAsync({
         }
 
         console.log("ZIP Download started:", downloadId);
-
+        output.textContent = "✓ Page saved successfully.";
         URL.revokeObjectURL(zipUrl);
 
     });
@@ -341,54 +361,11 @@ const blob = new Blob([html], { type: "text/html" });
 
 const blobUrl = URL.createObjectURL(blob);
 
-/*
-chrome.downloads.download({
 
-    url: blobUrl,
-
-    filename:
-        response.title.replace(/[\\/:*?"<>|]/g, "_") + ".html",
-
-    saveAs: true
-
-}, (downloadId) => {
-
-    if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        return;
-    }
-
-    console.log("Download started:", downloadId);
-
-    // Free the memory used by the Blob
-    URL.revokeObjectURL(blobUrl);
-
-});
-
-chrome.downloads.download({
-
-    url: jsonBlobUrl,
-
-    filename:
-        response.title.replace(/[\\/:*?"<>|]/g, "_") + ".json",
-
-    saveAs: true
-
-}, (downloadId) => {
-
-    if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        return;
-    }
-
-    console.log("JSON Download started:", downloadId);
-
-    URL.revokeObjectURL(jsonBlobUrl);
-
-});
-*/
 
         }
     );
 
 });
+
+loadPageSummary();
