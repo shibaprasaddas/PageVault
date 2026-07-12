@@ -9,6 +9,134 @@ function cleanTitle(title) {
 
 }
 
+function createCleanText(html) {
+
+    if (!html)
+        return "";
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    const elements = doc.body.querySelectorAll(
+        "h1, h2, h3, h4, h5, h6, p, li"
+    );
+
+    let lines = [];
+
+    elements.forEach(element => {
+
+        // Skip paragraphs already contained within a list item
+        if (
+            element.tagName === "P" &&
+            element.closest("li")
+        )
+            return;
+
+        let text = element.innerText.trim();
+
+        if (!text)
+            return;
+
+        // Prefix list items with a bullet
+        if (element.tagName === "LI")
+            text = "• " + text;
+
+        lines.push(text);
+
+    });
+
+    return lines
+        .join("\n\n")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+}
+// ===== Old createCleanText() =====
+/*
+function createCleanText(html) {
+
+    if (!html)
+        return "";
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    let output = "";
+
+    function append(text) {
+
+        if (text)
+            output += text;
+
+    }
+
+    function walk(node) {
+
+        if (node.nodeType === Node.TEXT_NODE) {
+
+            append(node.textContent);
+
+            return;
+
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE)
+            return;
+
+        const tag = node.tagName.toLowerCase();
+
+        switch (tag) {
+
+            case "br":
+                append("\n");
+                break;
+
+            case "p":
+                node.childNodes.forEach(walk);
+                append("\n\n");
+                break;
+
+            case "h1":
+            case "h2":
+            case "h3":
+            case "h4":
+            case "h5":
+            case "h6":
+                append("\n\n");
+                node.childNodes.forEach(walk);
+                append("\n\n");
+                break;
+            case "li":
+
+                append("\n• ");
+
+                node.childNodes.forEach(walk);
+
+                return;
+            default:
+                node.childNodes.forEach(walk);
+
+        }
+
+    }
+
+    let sections = [];
+
+    for (const child of doc.body.children) {
+
+        const text = child.innerText.trim();
+
+        if (text)
+            sections.push(text);
+
+    }
+
+    return sections.join("\n\n");
+
+}
+*/
+
 function cleanCompanyName(name) {
 
     if (!name)
@@ -124,8 +252,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 article ? article.title : document.title
             ),
             url: window.location.href,
+
+            // Original Readability text
             text: article ? article.textContent : document.body.innerText,
+
+            // AI-friendly text generated from HTML
+            cleanText: createCleanText(
+                article ? article.content : ""
+            ),
+
+            // Original extracted HTML
             content: article ? article.content : "",
+
             company: detectCompany()
         });
 

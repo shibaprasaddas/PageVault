@@ -223,21 +223,17 @@ function createJson(pageData) {
         // Metadata
         version: VERSION,
         extensionVersion: EXTENSION_VERSION,
-
         savedOn: new Date().toISOString(),
 
         // Job Details
         title: pageData.title,
-
         company: pageData.company || "",
-
         source: detectSource(pageData.url),
-
         url: pageData.url,
 
         // Job Content
         text: pageData.text,
-
+        cleanText: pageData.cleanText,
         content: pageData.content
 
     };
